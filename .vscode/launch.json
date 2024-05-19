@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "package.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [               // 参数，每个参数的参数值无论是否是数字都需用引号
+                "--dir","dir_chuck",  
+                "--save_dir","save_binary_dir_chuck",
+                "--split_ratio", "0.1"
+            ]
+        }
+    ]
+}
