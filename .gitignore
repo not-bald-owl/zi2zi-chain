@@ -152,3 +152,6 @@ output/
 
 # font_output
 fonts_output/
+
+# generator_input
+Generator/images
