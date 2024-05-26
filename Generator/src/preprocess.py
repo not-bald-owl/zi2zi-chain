@@ -20,6 +20,7 @@ def preprocess_image(image_path, output_path):
     img.save(output_path)
 
 def preprocess_image_otsu(image_path, output_path):
+    # print(image_path, output_path)
     # 打开并转换图像为灰度
     img = Image.open(image_path).convert('L')
     # 增强对比度, 参数：2.0 表示将对比度提高两倍，数值越大对比度增强越明显。

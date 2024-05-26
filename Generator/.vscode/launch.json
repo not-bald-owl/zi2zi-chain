@@ -8,7 +8,7 @@
             "name": "Python 调试程序: 包含参数的当前文件",
             "type": "debugpy",
             "request": "launch",
-            "program": "src\\main.py",
+            "program": "src\\generator_main.py",
             "console": "integratedTerminal",
             "args": [
                 ".\\images\\ZhaoMF_GB2312",

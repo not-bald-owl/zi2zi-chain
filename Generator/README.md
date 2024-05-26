@@ -66,3 +66,37 @@ Install fontforge under Windows, add it's bin fold's path into var *PATH*, and e
 ## License
 
 Apache 2.0
+
+
+# 字体生成器
+
+![示例](readme-asset/image.png)
+
+从PNG文件生成字体：
+
+将PNG字符文件以其Unicode名称命名，如 "0.png" 和 "零.png"；将它们放入源目录中，并进行转换。
+
+```
+FontGenerator
+├──fonts 字体文件输出目录
+├──images 输入图片存储目录
+├──potrace SVG生成软件
+├──readme-asset 资源
+└──src 源代码
+```
+
+快速运行：
+
+```sh
+python src/generator_main.py source-pic-directory destination-font-name.ttf
+```
+
+## 依赖软件安装
+
+### Potrace
+
+用于生成 svg 文件，Windows 环境下无需安装（已经放置在项目文件夹中）
+
+### FontForge
+
+用于生成字体，目前只支持在 Windows 下安装后将 `D:\ProgramFiles\FontForgeBuilds\bin` 放入 PATH 中的方式来使用 ffpython 库。推荐查阅官方文档以添加其他支持。
