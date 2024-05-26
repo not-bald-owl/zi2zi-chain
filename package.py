@@ -56,6 +56,8 @@ def get_special_type():
 
     with open(args.type_file, 'r', encoding='utf-8') as fp:
         font_list = [line.strip() for line in fp]
+    # print("Font list:", font_list)
+
     '''
     font_list = os.listdir(args.type_dir)
     font_list = [f[:f.find('.test.jpg')] for f in font_list]

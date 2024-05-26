@@ -265,7 +265,7 @@ class Zi2ZiModel:
             vutils.save_image(tensor_to_plot, basename + "_generate.png")
             '''
 
-    # 需要生成图像与真实图像拼接 执行ssample1，否则执行sample2
+    # 从一行文字中生成图像，需要生成图像与真实图像拼接 执行ssample，否则执行sample2
     def sample2(self, batch, basename):
         chk_mkdir(basename)
         cnt = 0

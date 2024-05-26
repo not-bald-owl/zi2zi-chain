@@ -77,15 +77,15 @@ def main():
         gpu_ids=args.gpu_ids
     )
 
-    # 在模型内部使用 DataParallel
+    # 显卡数量大于1时 在模型内部使用 DataParallel
     if len(args.gpu_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=args.gpu_ids)
+        model = model.module
 
-    # 由于设置了多卡并行 在model后面加上module 如果是单卡的话 则所有的model.module改为model即可
-    model.module.setup()
-    model.module.print_networks(True)
+    model.setup()
+    model.print_networks(True)
     if args.resume:
-        model.module.load_networks(args.resume)
+        model.load_networks(args.resume)
 
     # val dataset load only once, no shuffle
     val_dataset = DatasetFromObj(os.path.join(data_dir, 'val.obj'), input_nc=args.input_nc)
@@ -106,28 +106,28 @@ def main():
         total_batches = math.ceil(len(train_dataset) / args.batch_size)
         dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
         for bid, batch in enumerate(dataloader):
-            model.module.set_input(batch[0], batch[2], batch[1])
-            const_loss, l1_loss, category_loss, cheat_loss = model.module.optimize_parameters()
+            model.set_input(batch[0], batch[2], batch[1])
+            const_loss, l1_loss, category_loss, cheat_loss = model.optimize_parameters()
             if bid % 100 == 0:
                 passed = time.time() - start_time
                 log_format = "Epoch: [%2d], [%4d/%4d] time: %4.2f, d_loss: %.5f, g_loss: %.5f, " + \
                              "category_loss: %.5f, cheat_loss: %.5f, const_loss: %.5f, l1_loss: %.5f"
-                print(log_format % (epoch, bid, total_batches, passed, model.module.d_loss.item(), model.module.g_loss.item(),
+                print(log_format % (epoch, bid, total_batches, passed, model.d_loss.item(), model.g_loss.item(),
                                     category_loss, cheat_loss, const_loss, l1_loss))
             if global_steps % args.checkpoint_steps == 0:
-                model.module.save_networks(global_steps)
+                model.save_networks(global_steps)
                 print("Checkpoint: save checkpoint step %d" % global_steps)
             if global_steps % args.sample_steps == 0:
                 for vbid, val_batch in enumerate(val_dataloader):
-                    model.module.sample(val_batch, os.path.join(sample_dir, str(global_steps)))
+                    model.sample(val_batch, os.path.join(sample_dir, str(global_steps)))
                 print("Sample: sample step %d" % global_steps)
             global_steps += 1
         if (epoch + 1) % args.schedule == 0:
-            model.module.update_lr()
+            model.update_lr()
     for vbid, val_batch in enumerate(val_dataloader):
-        model.module.sample(val_batch, os.path.join(sample_dir, str(global_steps)))
+        model.sample(val_batch, os.path.join(sample_dir, str(global_steps)))
         print("Checkpoint: save checkpoint step %d" % global_steps)
-    model.module.save_networks(global_steps)
+    model.save_networks(global_steps)
 
 
 if __name__ == '__main__':

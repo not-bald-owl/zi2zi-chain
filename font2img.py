@@ -288,7 +288,7 @@ def fonts2imgs(src_fonts_dir, dst, char_size, canvas_size,
             count += 1
 
 
-def imgs2imgs(src, dst, canvas_size, sample_count, sample_dir):
+def imgs2imgs2(src, dst, canvas_size, sample_count, sample_dir):
 
     # -*- You should fill the target imgs' label_map -*-
     label_map = {
@@ -343,6 +343,27 @@ def imgs2imgs(src, dst, canvas_size, sample_count, sample_dir):
             e.save(os.path.join(sample_dir, "%d_%04d.jpg" % (label, count)))
             count += 1
 
+def imgs2imgs(src, dst, canvas_size, sample_count, sample_dir):
+
+    # 填充目标图片的标签映射
+    label_map = {
+        '1号字体': 0,
+        '2号字体': 1,
+    }
+    count = 0
+    for i in tqdm(range(sample_count)):
+        if count == sample_count:
+            break
+        src_img_path = os.path.join(src, f"{i}.png")
+        dst_img_path = os.path.join(dst, f"{i}.png")
+        if not (os.path.exists(src_img_path) and os.path.exists(dst_img_path)):
+            continue  # 如果某个索引的图片不存在，则跳过这个索引
+        src_img = Image.open(src_img_path)
+        dst_img = Image.open(dst_img_path)
+        e = draw_imgs2imgs_example(src_img, dst_img, canvas_size)
+        if e:
+            e.save(os.path.join(sample_dir, "30_%04d.jpg" % count))
+            count += 1
 
 load_global_charset()
 parser = argparse.ArgumentParser()

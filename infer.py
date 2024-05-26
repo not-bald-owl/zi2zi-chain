@@ -26,6 +26,8 @@ writer_dict = {
 parser = argparse.ArgumentParser(description='Infer')
 parser.add_argument('--experiment_dir', required=True,
                     help='experiment directory, data, samples,checkpoints,etc')
+parser.add_argument('--infer_dir', type=str, default='infer',
+                    help='directory for inference results')
 parser.add_argument('--start_from', type=int, default=0)
 parser.add_argument('--gpu_ids', default=[], nargs='+', help="GPUs")
 parser.add_argument('--image_size', type=int, default=256,
@@ -72,7 +74,7 @@ def main():
     data_dir = os.path.join(args.experiment_dir, "data")
     checkpoint_dir = os.path.join(args.experiment_dir, "checkpoint")
     sample_dir = os.path.join(args.experiment_dir, "sample")
-    infer_dir = os.path.join(args.experiment_dir, "infer_GB2312")
+    infer_dir = os.path.join(args.experiment_dir, args.infer_dir)  # 使用传入的infer_dir参数
     chk_mkdir(infer_dir)
 
     # train_dataset = DatasetFromObj(os.path.join(data_dir, 'train.obj'), augment=True, bold=True, rotate=True, blur=True)
@@ -159,12 +161,17 @@ def main():
                 tensor_to_plot = torch.cat([model.fake_B, model.real_B], 3)
                 # img = vutils.make_grid(tensor_to_plot)
                 save_image(tensor_to_plot, os.path.join(infer_dir, "infer_{}".format(writer_dict_inv[label_idx]) + "_construct.png"))
-        else:
+        elif args.from_txt:
             # model.set_input(batch[0], batch[2], batch[1])
             # model.optimize_parameters()
             # model.sample(batch, infer_dir) # 生成图像和真实图像拼在一起
-            # model.sample2(batch, infer_dir) # 只需要生成图像 改变拼接的操作
-            model.sample2_all(dataloader, src_chars, infer_dir)
+            model.sample2(batch, infer_dir) # 从一行文字中生成图像 只需要生成图像 改变拼接的操作
+            global_steps += 1
+        elif args.from_txt2:
+            # model.set_input(batch[0], batch[2], batch[1])
+            # model.optimize_parameters()
+            # model.sample(batch, infer_dir) # 生成图像和真实图像拼在一起
+            model.sample2_all(dataloader, src_chars, infer_dir) # 从本地的txt文件中生成图像
             global_steps += 1
 
     t_finish = time.time()
