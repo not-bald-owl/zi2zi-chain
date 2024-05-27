@@ -102,10 +102,10 @@ python font2img.py --src_font=src.ttf
 **注意**：目标字体图片的命名格式为 该图片对应的汉字~下面作者字典对应的值.图片格式的后缀名。
 
 
-如我们拥有若干张多宝塔碑的图片，图片格式为.gif，则命名为 啊~顏真卿多寶塔體.gif 、 哎~顏真卿多寶塔體.gif、 皑~顏真卿多寶塔體.gif等。
+如果我们拥有若干张多宝塔碑的图片，图片格式为.gif，则命名为 `啊~顏真卿多寶塔體.gif` 、 `哎~顏真卿多寶塔體.gif`、 `皑~顏真卿多寶塔體.gif` 等。
 
 
-对于特定格式的图片，也可以使用我的data.preprocess.py文件来批量更改图片数据格式。
+对于特定格式的图片，也可以使用我写的data_preprocess.py文件来批量更改图片数据格式。
 
 
 ```python
@@ -131,7 +131,7 @@ python font2img.py --src_font=src.ttf
 当原图片和目标图片都不需要从现有的字体生成时，可以使用模式3。此时src_imgs和dst_imgs都需要指定为图片的路径。
 
 
-操作比较简单，只需要对原图片和目标图片进行一个拼接。但要**注意**的是，原图片文件夹和目标图片文件夹的图片必须是一一对应的、顺序一致的。
+操作比较简单，只需要对原图片和目标图片进行一个拼接。但要注意的是，**原图片文件夹和目标图片文件夹的图片必须是一一对应的、顺序一致的**。
 
 ```sh
 python font2img.py --src_imgs=source_path
@@ -193,27 +193,27 @@ experiment/
 
 #### 单卡运行
 ```sh
-python train.py --experiment_dir=experiment 
-				--gpu_ids=cuda:0 
-                --batch_size=32 
-                --epoch=100
-                --sample_steps=200 
-                --checkpoint_steps=500
+python train.py --experiment_dir experiment 
+				--gpu_ids cuda:0 
+                --batch_size 32 
+                --epoch 100
+                --sample_steps 200 
+                --checkpoint_steps 500
 ```
 **schedule** 在这里表示学习率将在多少个epochs之间减半。如果不存在，训练命令会在**experiment_dir**下创建**sample,logs,checkpoint**目录，您可以在其中查看和管理训练的进度。
 
 在训练过程中，您会在checkpoint目录中找到两个或多个checkpoint文件**N_net_G.pth**和**N_net_D.pth**，其中N表示步数。
 
-**警告**：如果您的**--checkpoint_steps**较小，您将在checkpoint路径中找到大量的checkpoint文件，并且您的磁盘空间将被填满无用的checkpoint文件。您可以删除无用的checkpoint文件以节省磁盘空间。
+**警告**：如果您的 **checkpoint_steps** 较小，您将在checkpoint路径中找到大量的checkpoint文件，并且您的磁盘空间将被填满无用的checkpoint文件。您可以删除无用的checkpoint文件以节省磁盘空间。
 
 #### 多卡并行
 ```sh
-python train.py --experiment_dir=experiment 
-				--gpu_ids=cuda:0 cuda:1
-                --batch_size=32 
-                --epoch=100
-                --sample_steps=200 
-                --checkpoint_steps=500
+python train.py --experiment_dir experiment 
+				--gpu_ids cuda:0 cuda:1
+                --batch_size 32 
+                --epoch 100
+                --sample_steps 200 
+                --checkpoint_steps 500
 ```
 
 ### 第四步：模型推理——生成字体图片 infer.py
@@ -273,10 +273,103 @@ python infer.py --experiment_dir experiment
 
 **src_txt_file** 是你想要推理的本地txt文件路径。 
 
+#### 此时experiment目录下的布局为：
 
+```sh
+experiment/
+├── checkpoint
+└── data
+    ├── train.obj
+    └── val.obj
+├── sample
+├── infer
+```
 ## 字体制作 使用指南
 
+字体制作部分的思路分为两步：
 
+1. 先对infer推理生成的图片再做一次预处理，平滑笔画上的锯齿毛边，减少图像噪点，同时提高清晰度；
+
+2. 对处理后的图片进行矢量化、生成字体。
+
+
+```
+FontGenerator
+├──potrace SVG生成软件
+├──readme-asset 资源
+└──src 源代码
+```
+
+### Requirement
+
+安装的库版本如下:
+
+* opencv-python
+* pillow
+* numpy
+* ffpython
+
+### 依赖软件安装
+
+#### Potrace
+
+用于生成 svg 文件，Windows 环境下无需安装（已经放置在项目文件夹中）
+
+#### FontForge
+
+用于生成字体，目前仅支持在 Windows 下安装后将 `D:\ProgramFiles\FontForgeBuilds\bin` 放入 PATH 中的方式来使用 ffpython 库。推荐查阅官方文档以添加其他支持。
+
+
+具体添加path的方法如下：
+![fontforge添加到系统路径的方法](results/fontforge添加到系统路径的方法.png)
+
+
+### 主要函数说明
+
+#### preprocess_image_otsu
+
+- **`enhance(2.0)`**: 增强图像对比度。`2.0` 增加对比度；数值越大，对比度越高。
+- **`medianBlur(img_np, 5)`**: 减少图像噪点。`5` 是核大小；数值越大，图像越平滑。
+- **`adaptiveThreshold(..., 21, 5)`**:
+  - `21`: 局部阈值化的核大小；数值越大，结果越平滑。
+  - `5`: 在阈值化中从均值或加权均值中减去的常数。
+- **`threshold(..., cv2.THRESH_OTSU)`**: 应用 Otsu 方法自动找到最佳阈值。
+
+#### bitmap_to_svg
+
+- **`--opttolerance 0.2`**: Potrace 中的曲线优化容差。数值越小，保留的位图细节越多。
+- **`--alphamax 3.5`**: Potrace 中曲线平滑的最大角度。数值越大，曲线越平滑。
+
+### 生成字体 Generator/src/generator_main.py
+
+```sh
+python Generator/src/generator_main.py experiment/infer_GB2312/0 experiment/my_first_font.ttf
+```
+
+其中，第一个参数是推理图片目录，即infer_directory；第二个参数是生成字体的路径及名称，即output_font_name。
+
+#### 此时experiment目录下的布局为：
+
+```sh
+experiment/
+├── checkpoint
+└── data
+    ├── train.obj
+    └── val.obj
+├── sample
+├── infer
+├── processed
+├── char_svg
+├── my_first_font.ttf
+```
+
+```参数说明
+- `processed/`: 经过第二次预处理的图片目录。
+- `char_svg/`: 存储字符转换为SVG格式的图片目录。
+- `my_first_font.ttf`: 一个名为 "my_first_font" 的 TrueType 字体文件，为从char_svg目录中生成的字体。
+```
+
+如果目标是想要制作自己的字体，则可以将**my_first_font.ttf**直接下载使用；如果想要对推理的图片进行二次创作，如抠图、填充、拼接等，则可以使用**processed**目录或者**char_svg**目录下的图片，这两个目录下图片提供了三种图片格式（.png、.bmp、.svg）供下载使用。
 
 ## Pre-trained model
 本项目提供训练好的模型，有方正多宝塔碑、多宝塔碑、柳公权楷书、魏碑、赵孟頫三门记、何绍基隶书、金农隶书供大家下载使用。

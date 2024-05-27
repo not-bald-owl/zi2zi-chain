@@ -4,8 +4,9 @@ from preprocess import preprocess_image, preprocess_image_otsu
 from bitmap import bitmap_to_svg
 
 def main(input_dir, output_font_path):
-    processed_dir = os.path.join(input_dir, 'processed')
-    svg_dir = os.path.join(input_dir, 'char_svg')
+    parent_dir = os.path.dirname(os.path.dirname(input_dir))  # 获取输入目录的上两级目录
+    processed_dir = os.path.join(parent_dir, 'processed')  # 在上两级目录中创建 processed 文件夹
+    svg_dir = os.path.join(parent_dir, 'char_svg')  # 在上两级目录中创建 char_svg 文件夹
     os.makedirs(processed_dir, exist_ok=True)
     os.makedirs(svg_dir, exist_ok=True)
 

@@ -29,6 +29,7 @@ To run this program, please install these requirements:
 opencv-python
 pillow
 numpy
+ffpython
 ```
 
 and these software:
@@ -88,8 +89,10 @@ FontGenerator
 快速运行：
 
 ```sh
-python src/generator_main.py source-pic-directory destination-font-name.ttf
+python Generator/src/generator_main.py experiment_YanZQ_Duobaota/infer_Duobaota_GB2312/0 experiment_YanZQ_Duobaota/my_first_font.ttf
 ```
+
+其中，第一个参数是推理图片目录，即infer_directory；第二个参数是生成字体的路径及名称，即output_font_name。
 
 ## 依赖软件安装
 
