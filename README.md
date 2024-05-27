@@ -343,7 +343,7 @@ FontGenerator
 ### 生成字体 Generator/src/generator_main.py
 
 ```sh
-python Generator/src/generator_main.py experiment/infer_GB2312/0 experiment/my_first_font.ttf
+python Generator/src/generator_main.py experiment/infer/0 experiment/my_first_font.ttf
 ```
 
 其中，第一个参数是推理图片目录，即infer_directory；第二个参数是生成字体的路径及名称，即output_font_name。
@@ -363,11 +363,11 @@ experiment/
 ├── my_first_font.ttf
 ```
 
-```参数说明
+参数说明
 - `processed/`: 经过第二次预处理的图片目录。
 - `char_svg/`: 存储字符转换为SVG格式的图片目录。
 - `my_first_font.ttf`: 一个名为 "my_first_font" 的 TrueType 字体文件，为从char_svg目录中生成的字体。
-```
+
 
 如果目标是想要制作自己的字体，则可以将**my_first_font.ttf**直接下载使用；如果想要对推理的图片进行二次创作，如抠图、填充、拼接等，则可以使用**processed**目录或者**char_svg**目录下的图片，这两个目录下图片提供了三种图片格式（.png、.bmp、.svg）供下载使用。
 
